@@ -1,0 +1,421 @@
+{% comment %} <!DOCTYPE html>
+<html>
+<head>
+    <title>AI Image Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .form-container {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        textarea, input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #loading {
+            display: none;
+            margin: 20px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            text-align: center;
+        }
+        #error {
+            color: #d32f2f;
+            margin: 15px 0;
+            padding: 10px;
+            background: #ffebee;
+            border-radius: 4px;
+            display: none;
+        }
+        #imageResult {
+            margin-top: 30px;
+            display: none;
+        }
+        #generatedImage {
+            max-width: 100%;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .download-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .download-btn:hover {
+            background: #0b7dda;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>AI Image Generator</h1>
+        
+        <form id="imageForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_prompt">What do you want to generate?</label>
+                <textarea id="id_prompt" name="prompt" placeholder="Describe the image you want to create..." required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_negative_prompt">What should NOT appear in the image? (optional)</label>
+                <textarea id="id_negative_prompt" name="negative_prompt" placeholder="Things you want to exclude from the image..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 20px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="id_width">Width (px)</label>
+                    <input type="number" id="id_width" name="width" value="512" min="256" max="1024">
+                </div>
+                
+                <div class="form-group" style="flex: 1;">
+                    <label for="id_height">Height (px)</label>
+                    <input type="number" id="id_height" name="height" value="512" min="256" max="1024">
+                </div>
+            </div>
+            
+            <button type="submit">Generate Image</button>
+        </form>
+
+        <div id="loading">
+            <p>Generating your image... This may take 10-30 seconds...</p>
+        </div>
+        
+        <div id="error"></div>
+
+        <div id="imageResult">
+            <h2 id="resultPrompt"></h2>
+            <img id="generatedImage" alt="Generated Image">
+            <br>
+            <a id="downloadLink" href="#" class="download-btn">Download Image</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('imageForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // UI Elements
+            const form = e.target;
+            const loading = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            const resultDiv = document.getElementById('imageResult');
+            
+            // Show loading, hide results and errors
+            loading.style.display = 'block';
+            errorDiv.style.display = 'none';
+            resultDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(new FormData(form))
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Request failed');
+                }
+                
+                if (data.status === 'success') {
+                    // Display the generated image
+                    document.getElementById('resultPrompt').textContent = 
+                        Generated: "${data.prompt}";
+                    
+                    const img = document.getElementById('generatedImage');
+                    img.src = data:image/png;base64,${data.image_data};
+                    
+                    // Set up download link
+                    const downloadLink = document.getElementById('downloadLink');
+                    downloadLink.href = data:image/png;base64,${data.image_data};
+                    downloadLink.download = generated_${Date.now()}.png;
+                    
+                    // Show result
+                    resultDiv.style.display = 'block';
+                } else {
+                    throw new Error(data.message || 'Generation failed');
+                }
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html> {% endcomment %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c63ff;
+            --secondary: #4d44db;
+            --accent: #ff6584;
+            --light-bg: #f8f9fa;
+            --dark-text: #2d3748;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7ff;
+            color: var(--dark-text);
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        
+        .generator-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .history-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .history-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .generated-image {
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 1px solid #eee;
+        }
+        
+        .tab-content {
+            padding: 1.5rem 0;
+        }
+        
+        .nav-tabs .nav-link.active {
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-robot me-2"></i>AI Image Generator
+            </a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="generator-card">
+            <h2 class="text-center mb-4"><i class="fas fa-magic me-2"></i>Generate AI Images</h2>
+            
+            <form method="post" id="generationForm">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label class="form-label">Prompt</label>
+                    <textarea name="prompt" class="form-control" rows="3" required 
+                              placeholder="Describe the image you want to generate..."></textarea>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Width</label>
+                        <select name="width" class="form-select">
+                            <option value="512">512px</option>
+                            <option value="768">768px</option>
+                            <option value="1024" selected>1024px</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Height</label>
+                        <select name="height" class="form-select">
+                            <option value="512">512px</option>
+                            <option value="768">768px</option>
+                            <option value="1024" selected>1024px</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 py-2">
+                    <i class="fas fa-sparkles me-2"></i>Generate Image
+                </button>
+            </form>
+            
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Generating your image... Please wait.</p>
+            </div>
+        </div>
+        
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="results-tab" data-bs-toggle="tab" 
+                        data-bs-target="#results" type="button" role="tab">
+                    <i class="fas fa-image me-1"></i>Results
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="history-tab" data-bs-toggle="tab" 
+                        data-bs-target="#history" type="button" role="tab">
+                    <i class="fas fa-history me-1"></i>History
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="results" role="tabpanel">
+                {% if images %}
+                    <div class="alert alert-success">
+                        Generated at {{ current_time }}
+                    </div>
+                    <div class="result-grid">
+                        {% for image in images %}
+                        <div class="text-center">
+                            <img src="{{ image }}" alt="Generated image" class="generated-image">
+                            <div class="mt-2">
+                                <a href="{{ image }}" download="ai-image-{{ forloop.counter }}.png" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-download me-1"></i>Download
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% elif error %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-image fa-3x mb-3"></i>
+                        <p>No images generated yet. Submit a prompt above to get started!</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="tab-pane fade" id="history" role="tabpanel">
+                {% if history %}
+                    {% for item in history %}
+                    <div class="history-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong><i class="fas fa-quote-left me-1"></i>{{ item.prompt|truncatechars:60 }}</strong>
+                                <div class="text-muted small mt-1">
+                                    {{ item.width }}×{{ item.height }}px • {{ item.timestamp }}
+                                </div>
+                            </div>
+                            <div>
+                                <a href="{{ item.images.0 }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <img src="{{ item.images.0 }}" class="generated-image mt-2">
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-history fa-3x mb-3"></i>
+                        <p>No generation history yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('generationForm').addEventListener('submit', function() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+        });
+        
+        // Switch to results tab after generation
+        {% if images or error %}
+        document.addEventListener('DOMContentLoaded', function() {
+            var resultsTab = new bootstrap.Tab(document.getElementById('results-tab'));
+            resultsTab.show();
+        });
+        {% endif %}
+    </script>
+</body>
+</html>
