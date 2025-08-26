@@ -46,8 +46,8 @@ source venv/bin/activate # macOS/Linux
 5. Create a superuser (optional)
    python manage.py createsuperuser
 
-6.Run the development server
-  python manage.py runserver
+6. Run the development server
+   python manage.py runserver
 
 API Endpoints (Example)
 Endpoint	        Method	  Description
