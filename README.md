@@ -35,6 +35,7 @@ This backend handles **user authentication, API integrations, data management, a
 
 python -m venv venv
 venv\Scripts\activate   # Windows
+
 source venv/bin/activate # macOS/Linux
 
 3. Install dependencies
