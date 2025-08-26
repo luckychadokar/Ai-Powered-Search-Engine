@@ -24,26 +24,6 @@ This backend handles **user authentication, API integrations, data management, a
 
 ---
 
-## 📂 Project Structure
-Backend/
-│
-├── manage.py # Django management script
-├── requirements.txt # Python dependencies
-├── db.sqlite3 / Database # Database (use MySQL/PostgreSQL in prod)
-│
-├── project_name/ # Main Django project folder
-│ ├── settings.py
-│ ├── urls.py
-│ └── wsgi.py
-│
-├── apps/ # Custom Django apps
-│ ├── users/ # User authentication
-│ ├── search/ # AI search logic
-│ └── image_generator/ # AI image generation
-│
-├── static/ # Static assets (CSS, JS)
-└── templates/ # HTML templates
-
 
 ⚙️ Installation & Setup
 
